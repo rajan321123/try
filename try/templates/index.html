@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+        header {
+            background: #007bff;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 20px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .chat-container {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 350px;
+        }
+        .chat-box {
+            width: 100%;
+            height: 400px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+        }
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background: #f4f4f4;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .start-chat-btn {
+            background: #28a745;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+        .close-btn {
+            background: red;
+            margin-left: 5px;
+        }
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        Flask Chatbot
+    </header>
+
+    <!-- Start Chat Button -->
+    <button class="start-chat-btn" onclick="toggleChat()">Start Chat</button>
+
+    <!-- Chat Container -->
+    <div class="chat-container" id="chat-container">
+        <div class="chat-box">
+            <div class="chat-messages" id="chat-box"></div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+                <button class="close-btn" onclick="toggleChat()">X</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 Flask Chatbot. All rights reserved.
+    </footer>
+
+    <script>
+        function toggleChat() {
+            let chatContainer = document.getElementById("chat-container");
+            let startChatBtn = document.querySelector(".start-chat-btn");
+
+            if (chatContainer.style.display === "none" || chatContainer.style.display === "") {
+                chatContainer.style.display = "block";
+                startChatBtn.style.display = "none"; // Hide button when chat opens
+            } else {
+                chatContainer.style.display = "none";
+                startChatBtn.style.display = "block"; // Show button when chat closes
+            }
+        }
+
+        function sendMessage() {
+            let userInput = document.getElementById("user-input").value;
+            if (userInput.trim() === "") return;
+
+            let chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<p><b>You:</b> ${userInput}</p>`;
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatBox.innerHTML += `<p><b>Bot:</b> ${data.response}</p>`;
+                document.getElementById("user-input").value = "";
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        document.getElementById("user-input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+    </script>
+
+</body>
+</html>
